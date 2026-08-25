@@ -6,7 +6,7 @@ build-backend = "pdm.backend"
 name = "dose-response"
 dynamic = ["version"]
 description = "Create Dose-Response-Curves from csv files"
-authors = [{ name = "Tim Hörmann" }, { email = "t.hoermann@audivir.de" }]
+authors = [{ name = "Tim Hörmann", email = "t.hoermann@audivir.de" }]
 readme = "README.md"
 requires-python = ">=3.10,<3.15"
 license = "MIT"
