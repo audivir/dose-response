@@ -1,65 +1,142 @@
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
 [project]
 name = "dose-response"
-version = "0.0.2"
-authors = [
-    {name = "Tim Hörmann"},
-    {email = "t.hoermann@audivir.de"}
-]
-
+dynamic = ["version"]
 description = "Create Dose-Response-Curves from csv files"
+authors = [{ name = "Tim Hörmann" }, { email = "t.hoermann@audivir.de" }]
 readme = "README.md"
-
-dependencies = [
-    "matplotlib",
-    "numpy",
-    "pandas",
-    "scipy"
+requires-python = ">=3.10,<3.15"
+license = "MIT"
+keywords = ["dose-response", "curve", "plot"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Typing :: Typed",
 ]
+dependencies = ["doctyper", "matplotlib", "numpy", "polars", "scipy"]
 
-[project.urls]
-homepage = "https://www.audivir.de/"
-repository = "https://github.com/tim25651/DRC"
-
-[tool.setuptools.packages.find]
-where = ["src"]
-include= ["drc*"]
+[project.optional-dependencies]
 
 [project.scripts]
-drc = "drc.cli:main"
-drc-test = "drc.test:main"
+drc = "dose_response.cli:main"
+drc-test = "dose_response.generate_test_data:main"
 
-[tool.isort]
-profile = "black"
-split_on_trailing_comma = false
+[project.urls]
+Homepage = "https://github.com/audivir/dose-reponse"
+Repository = "https://github.com/audivir/dose-reponse"
+Issues = "https://github.com/audivir/dose-reponse/issues"
 
-[tool.black]
-target-version = ["py311"]
-line-length = 88
-# include src and tests regex .pyi?$ to include type hints
-include = '(src|examples|tests)\/.*\.py'
-# unstable
-unstable = true
-skip-magic-trailing-comma = true
+[dependency-groups]
+dev = ["mypy", "pytest", "coverage", "prek", "ruff"]
+
+[tool.pdm.version]
+source = "file"
+path = "dose_response/__init__.py"
 
 [tool.mypy]
-# ignore_missing_imports = true
-python_version = "3.11"
-enable_error_code = '''type-arg,no-untyped-def,redundant-cast,redundant-self,comparison-overlap,
-                    no-untyped-call,no-any-return,no-any-unimported,unreachable,redundant-expr,
+strict = true
+disable_error_code = "import-untyped"
+enable_error_code = """type-arg,no-untyped-def,redundant-cast,redundant-self,comparison-overlap,
+                    no-untyped-call,no-any-return,no-any-unimported,unreachable,deprecated,redundant-expr,
                     possibly-undefined,truthy-bool,truthy-iterable,ignore-without-code,
-                    unused-awaitable,unused-ignore,explicit-override,unimported-reveal'''
-disable_error_code = 'import-untyped'
-disallow_untyped_calls = true
-disallow_untyped_defs = true
-warn_unused_ignores = true
-warn_redundant_casts = true
-warn_return_any = true
+                    unused-awaitable,unused-ignore,explicit-override,unimported-reveal,mutable-override,explicit-any"""
+
+# beyond strict
 warn_unreachable = true
-exclude = ["OLD", "OTHER", "build", "docs", "test"]
+warn_unused_configs = true
+local_partial_types = true
+
+exclude = ["build", "docs"]
+
+[tool.coverage.run]
+source = ["tests", "dose_response"]
+command_line = "-m pytest"
+branch = true
+patch = ["subprocess"]
+
+[tool.coverage.report]
+omit = ["_types.py", "tests/benchmark.py"]
+exclude_also = [
+  "if TYPE_CHECKING:",
+  'if __name__ == "__main__"',
+  "from __future__ import annotations",
+  "@overload",
+  "\\.\\.\\.",
+]
+fail_under = 100
+show_missing = true
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
+xfail_strict = true
+log_cli_level = "INFO"
+filterwarnings = [
+  "error",
+  "ignore::pytest.PytestCacheWarning",
+  "ignore::DeprecationWarning",
+]
+testpaths = ["tests"]
 
 [tool.vulture]
 ignore_names = ["_*", "unused_*"]
-paths = ["src", ".whitelist"]
+paths = [".whitelist", "tests", "dose_response"]
 make_whitelist = true
 sort_by_size = true
 verbose = false
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+dummy-variable-rgx = "^(dummy_.*|unused_.*|_)$"
+
+select = ["ALL"]
+
+ignore = [
+  "CPY001",  # Missing copyright notice at top of file
+  "PLC0415", # `import` should be at the top-level of a file
+  "ISC001",  # implicit-str-concat
+  "COM812",  # missing-trailing-comma
+  "S301",    # `pickle` and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue
+  "TD003",   # Missing issue link on the line following this TODO
+  "FIX002",  # Line contains TODO, consider resolving the issue
+  "FBT001",  # Boolean-typed positional argument in function definition
+  "FBT002",  # Boolean default positional argument
+  "FBT003",  # Boolean positional value in function call
+  "ANN401",  # Dynamically typed expressions (typing.Any) are disallowed in `**kwargs`
+  "EM101",   # Exception must not use a string literal, assign to variable first
+  "EM102",   # Exception must not use an f-string literal, assign to variable first
+  "TRY003",  # Avoid specifying long messages outside the exception class
+  "TRY300",  # Use of else blocks in try/except
+  "D105",    # Missing docstring in magic method
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.isort]
+required-imports = ["from __future__ import annotations"]
+split-on-trailing-comma = false
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.lint.per-file-ignores]
+# Stub files for C extensions are allowed to have docstrings and overwrite __doc__, __version__, etc.
+"_*.pyi" = ["PYI021", "A"]
+
+# conf.py automatically created by Sphinx
+"docs/conf.py" = ["INP001", "D100", "ERA001", "A"]
+
+# Test files do not need to have docstrings at each test function
+# S101: assert, PLR2004: magic value comparison, T20: print statements
+"**/test_*.py" = ["INP001", "PLR2004", "S101", "D101", "D102", "D103", "T20"]
+"tests/**" = ["INP001", "PLR2004", "S101", "D101", "D102", "D103", "T20"]

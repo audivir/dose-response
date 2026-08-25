@@ -1,0 +1,95 @@
+# To use:
+#
+#     prek run -a
+#
+# Or:
+#
+#     prek install  # (runs every time you commit in git)
+#
+# To update this file:
+#
+#     prek update
+#
+# See https://github.com/j178/prek
+repos:
+  # standard hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      # order from https://prek.j178.dev/builtin
+      - id: trailing-whitespace
+      - id: check-added-large-files
+      - id: check-case-conflict
+      - id: end-of-file-fixer
+      # id: file-contents-sorter
+      - id: fix-byte-order-marker
+      - id: check-json
+      - id: check-toml
+      - id: check-vcs-permalinks
+      - id: check-yaml
+      - id: check-xml
+      - id: mixed-line-ending
+      - id: check-symlinks
+      - id: destroyed-symlinks
+      - id: check-merge-conflict
+      - id: detect-private-key
+      # - id: no-commit-to-branch
+      - id: check-shebang-scripts-are-executable
+      - id: check-executables-have-shebangs
+      # others
+      - id: debug-statements
+      - id: requirements-txt-fixer
+  # change tabs to spaces
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.5.6
+    hooks:
+      - id: remove-tabs
+        exclude: ^(docs)|\.go$
+  # CMake formatting
+  - repo: https://github.com/cheshirekow/cmake-format-precommit
+    rev: v0.6.13
+    hooks:
+      - id: cmake-format
+        additional_dependencies: [pyyaml]
+        types: [file]
+        files: (\.cmake|CMakeLists.txt)(.in)?$
+  # yaml formatting
+  - repo: https://github.com/google/yamlfmt
+    rev: v0.21.0
+    hooks:
+      - id: yamlfmt
+        # Suggested hook if you add a .clang-format file
+        # - repo: https://github.com/pre-commit/mirrors-clang-format
+        #  rev: v22.1.3
+        #  hooks:
+        #  - id: clang-format
+  # toml formatting
+  - repo: https://github.com/ComPWA/taplo-pre-commit
+    rev: v0.9.3
+    hooks:
+      - id: taplo-format
+  # markdown formatting
+  - repo: https://github.com/executablebooks/mdformat
+    rev: 1.0.0
+    hooks:
+      - id: mdformat
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.11.0.1-1
+    hooks:
+      - id: shellcheck
+        files: ^(\.zshrc|\.bashrc|\.env|.*\.sh)$
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.4
+    hooks:
+      - id: ruff-format
+      - id: ruff-check
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy
+        entry: mypy
+        language: system
+        types: [python]
+        require_serial: true
+        pass_filenames: false
+        args: [dose_response, tests]
